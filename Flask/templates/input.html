@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mushroom Classification</title>
+  <style>
+    /* Reset and universal styling */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #2C5364, #203A43, #0F2027);
+      color: #fff;
+    }
+
+    /* Layout container */
+    .layout {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      flex-wrap: wrap;
+    }
+
+    /* Left panel styling */
+    .left-panel {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 40px;
+      text-align: center;
+      position: relative;
+    }
+
+    /* Left panel content styles */
+    .left-panel h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      color: #00ffc6;
+    }
+
+    .left-panel h2 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #ffd166;
+      margin-bottom: 25px;
+    }
+
+    .left-panel p {
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 30px;
+      color: #d3d3d3;
+    }
+
+    /* Button styles */
+    .buttons {
+      display: flex;
+      gap: 15px;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .detect-btn,
+    .learn-btn {
+      padding: 15px 40px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .detect-btn {
+      background: #06d6a0;
+      color: #000;
+    }
+
+    .detect-btn:hover {
+      background: #05b087;
+    }
+
+    .learn-btn {
+      background: #118ab2;
+      color: #fff;
+    }
+
+    .learn-btn:hover {
+      background: #0e7490;
+    }
+
+    /* Image preview */
+    .preview img {
+      width: 100%;
+      max-width: 400px;
+      margin-top: 20px;
+      border-radius: 8px;
+    }
+
+    /* Right panel styling */
+    .right-panel {
+      flex: 1.2;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .right-panel img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85);
+      transition: transform 0.5s ease;
+    }
+
+    .right-panel img:hover {
+      transform: scale(1.05);
+    }
+
+    /* Media queries for responsiveness */
+    @media (max-width: 1200px) {
+      .layout {
+        flex-direction: row;
+      }
+
+      .left-panel {
+        padding: 40px 20px;
+      }
+
+      .buttons {
+        gap: 12px;
+      }
+
+      .detect-btn,
+      .learn-btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        flex-direction: column;
+      }
+
+      .left-panel {
+        padding: 30px 20px;
+      }
+
+      .buttons {
+        gap: 10px;
+      }
+
+      .detect-btn,
+      .learn-btn {
+        width: 100%;
+        padding: 12px;
+      }
+
+      .right-panel {
+        height: 40vh;
+      }
+
+      .preview img {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .left-panel {
+        padding-bottom: 80px;
+      }
+
+      .detect-btn {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="layout">
+    <div class="left-panel">
+      <h1>Mushroom Classification</h1>
+      <h2>Upload and Classify Mushroom Images</h2>
+      <p>Upload an image of a mushroom and we'll classify it for you!</p>
+
+      <form action="/Mushroom-classification-predict" method="post" enctype="multipart/form-data">
+        <input type="file" name="image_file" id="file_upload" onchange="showImage(event)" style="display:none;">
+        <label for="file_upload" class="detect-btn">Select Mushroom Image</label>
+
+        <div class="preview">
+          {% if filename %}
+            <img id="image-preview" src="{{ url_for('static', filename='uploads/' + filename) }}" />
+          {% else %}
+            <img id="image-preview" />
+          {% endif %}
+        </div>
+
+        <button type="submit" class="learn-btn">Predict</button>
+      </form>
+
+      {% if prediction %}
+        <div id="result">
+          The Mushroom is = {{ prediction }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="right-panel">
+      <img src="https://images.unsplash.com/photo-1729141230647-77db99b7c807?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8bXVzaHJvb20lMjAlMjA0ayUyMGRhcmslMjB3ZWJzaXRlfGVufDB8fDB8fHww" alt="Mushroom">
+    </div>
+  </div>
+
+  <script>
+    function showImage(event) {
+      const fileInput = event.target;
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      const preview = document.getElementById('image-preview');
+
+      if (file) {
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  </script>
+
+</body>
+</html>
