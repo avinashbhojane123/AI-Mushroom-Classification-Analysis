@@ -75,11 +75,13 @@ The dataset contains labeled images from three mushroom genera:
 ## 🖼️ Demo Screenshots
 
 - **Home Page**  
-![Screenshot (66)](https://github.com/user-attachments/assets/073b2331-43dd-484c-8710-c5aa192d4237)
+![Screenshot (66)](https://github.com/user-attachments/assets/cb7609a5-34a3-426d-aca9-6a9fd5b3c3f0)
+
 
 
 - **Classification Result**  
- ![Screenshot (67)](https://github.com/user-attachments/assets/015912d6-7cc4-4a48-892e-6d2ccc83ea73)
+![Screenshot (67)](https://github.com/user-attachments/assets/4f0e3d4e-b2c5-4c67-a7a9-a8a498b9e799)
+
 
 ## ⚙️ Installation & Setup
 
